@@ -14,17 +14,18 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    public function boot(): void
+     public function boot(): void
     {
-        // ចែករំលែកព័ត៌មានហាងទៅកាន់គ្រប់ Views ទាំងអស់ ប្រសិនបើតារាង settings មានពិតមែន
-        if (Schema::hasTable('settings')) {
-            $settings = Setting::pluck('value', 'key')->all();
+        // ការពារការគាំងកំឡុងពេល Build time ឬពេលគ្មានការតភ្ជាប់ Database
+        try {
+            if (Schema::hasTable('settings')) {
+                $settings = Setting::pluck('value', 'key')->all();
 
-            // រក្សាទុកក្នុង Config ដើម្បីហៅប្រើក្នុង Controller តាមរយៈ config('settings.shop_name')
-            config(['settings' => $settings]);
-
-            // ចែករំលែកទៅកាន់គ្រប់ Blade Views ទាំងអស់តាមរយៈអថេរ $shopSettings
-            View::share('shopSettings', $settings);
+                config(['settings' => $settings]);
+                View::share('shopSettings', $settings);
+            }
+        } catch (\Exception $e) {
+            // រំលងដោយស្ងៀមស្ងាត់ ប្រសិនបើគ្មានការតភ្ជាប់ Database (ឧ. ក្នុងពេលរត់ config:cache ពេល build)
         }
     }
 }
