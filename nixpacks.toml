@@ -1,2 +1,17 @@
 [phases.setup]
-nixPkgs = ["nodejs_22", "php84"]
+nixPkgs = [
+  "php84",
+  "php84Extensions.composer",
+  "nodejs_22"
+]
+
+[phases.install]
+cmds = [
+  "composer install --ignore-platform-reqs"
+]
+
+[phases.build]
+cmds = [
+  "npm install",
+  "npm run build"
+]
