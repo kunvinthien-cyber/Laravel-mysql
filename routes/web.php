@@ -13,7 +13,6 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\SettingController;
-use Illuminate\Support\Facades\Artisan;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -92,14 +91,5 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Routes សម្រាប់គ្រប់គ្រងការកំណត់ព័ត៌មានហាង
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
-});
-Route::get('/install-system', function () {
-    // ១. បង្កើតតារាង Database និងបញ្ចូលគណនីគំរូទាំងអស់
-    Artisan::call('migrate:fresh --seed --force');
-
-    // ២. បង្កើតតំណភ្ជាប់រូបភាពផលិតផល
-    Artisan::call('storage:link');
-
-    return 'ការដំឡើងប្រព័ន្ធ POS ទទួលបានជោគជ័យ!';
 });
 require __DIR__.'/auth.php';

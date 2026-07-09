@@ -1,3 +1,91 @@
+# Admin Dashboard
+
+Laravel admin/POS dashboard prepared for internet hosting.
+
+## Production Notes
+
+- Serve the app from the `public/` directory.
+- Public self-registration is disabled by default. Set `AUTH_REGISTRATION_ENABLED=true` only if you intentionally want open registration.
+- Do not expose installer routes on production. Use Laravel deployment commands from the server or hosting command runner.
+- Create the first admin through environment variables before running the seeder:
+  - `ADMIN_NAME`
+  - `ADMIN_EMAIL`
+  - `ADMIN_PASSWORD`
+
+## Railway Deployment
+
+1. Push this repository to GitHub.
+2. Create a Railway project from the GitHub repository.
+3. Add a MySQL database service.
+4. Set these variables on the Railway web service:
+
+```env
+APP_NAME="Admin Dashboard"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-domain.example
+APP_KEY=base64:GENERATE_WITH_php_artisan_key_generate_SHOW
+AUTH_REGISTRATION_ENABLED=false
+
+DB_CONNECTION=mysql
+DB_HOST=${{MySQL.MYSQLHOST}}
+DB_PORT=${{MySQL.MYSQLPORT}}
+DB_DATABASE=${{MySQL.MYSQLDATABASE}}
+DB_USERNAME=${{MySQL.MYSQLUSER}}
+DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
+
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+FILESYSTEM_DISK=public
+
+ADMIN_NAME="Super Admin"
+ADMIN_EMAIL=you@example.com
+ADMIN_PASSWORD=use-a-long-random-password
+```
+
+5. Deploy. Railway will install PHP dependencies, install Node dependencies, build Vite assets, run migrations, create the storage link, optimize Laravel, and serve `public/`.
+6. After the first successful deploy, run this once from Railway's shell or command runner:
+
+```bash
+php artisan db:seed --force
+```
+
+7. Log in with `ADMIN_EMAIL` and `ADMIN_PASSWORD`, then change the password in the app.
+
+## Shared Hosting / cPanel
+
+1. Upload the project outside `public_html` when possible.
+2. Point the domain document root to the project's `public/` directory.
+3. If the host cannot change the document root, move only the contents of `public/` into `public_html` and update `public_html/index.php` paths to point back to the project.
+4. Create a MySQL database and set the production `.env` values.
+5. Run:
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+php artisan key:generate --show
+php artisan migrate --force
+php artisan db:seed --force
+php artisan storage:link --force
+php artisan optimize
+```
+
+## Local Development
+
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm run dev
+php artisan serve
+```
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

@@ -114,4 +114,17 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Public Registration
+    |--------------------------------------------------------------------------
+    |
+    | Admin/POS installations should not usually allow anyone on the internet
+    | to create an account. Enable this only when you intentionally want open
+    | self-registration.
+    |
+    */
+
+    'registration_enabled' => env('AUTH_REGISTRATION_ENABLED', false),
+
 ];
