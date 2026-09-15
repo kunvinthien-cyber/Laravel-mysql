@@ -19,6 +19,11 @@ use App\Http\Controllers\SettingController;
 |--------------------------------------------------------------------------
 */
 
+// Root route for tests and quick health check
+Route::get('/', function () {
+    return response('OK', 200);
+});
+
 // ==========================================
 // ក្រុមទី ១៖ គ្រប់គ្នាដែលបាន Login រួចអាចប្រើប្រាស់បាន (Admin, Staff, Cashier)
 // ==========================================
@@ -45,7 +50,6 @@ Route::middleware(['auth'])->group(function () {
 // ក្រុមទី ២៖ សម្រាប់តែ Admin និង Staff ប៉ុណ្ណោះ (Cashier មិនអាចចូលបានទេ)
 // ==========================================
 Route::middleware(['auth', 'role:staff'])->group(function () {
-
     // គ្រប់គ្រងទំនិញ និងប្រភេទផលិតផល
     Route::resource('products', ProductController::class);
     Route::resource('categories', CategoryController::class);
