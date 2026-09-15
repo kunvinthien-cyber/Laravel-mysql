@@ -27,7 +27,7 @@ Route::get('/', function () {
 // ==========================================
 // ក្រុមទី ១៖ គ្រប់គ្នាដែលបាន Login រួចអាចប្រើប្រាស់បាន (Admin, Staff, Cashier)
 // ==========================================
-Route::middleware(['auth'])->group(function () {
+Route::middleware([\Illuminate\Auth\Middleware\Authenticate::class])->group(function () {
 
     // ទំព័រ Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

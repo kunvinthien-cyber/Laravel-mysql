@@ -1,3 +1,14 @@
+FROM node:22-alpine AS assets
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY resources ./resources
+COPY public ./public
+COPY vite.config.js postcss.config.js tailwind.config.js ./
+RUN npm run build
+
 FROM php:8.4-cli-alpine
 
 # Install system dependencies
@@ -35,8 +46,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
 COPY . .
+COPY --from=assets /app/public/build ./public/build
 
 RUN rm -f bootstrap/cache/*.php
 
@@ -48,5 +59,4 @@ RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
 # Expose Port
 EXPOSE 8000
 
-# Start Web Server ជាចម្បង (Server នឹងដំណើរការជានិច្ច មិន Crash ឡើយ)
-CMD php artisan migrate --force --seed && php artisan package:discover --ansi && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: admin-dashboard
+    name: pos
     runtime: docker
     plan: free
     rootDir: .
