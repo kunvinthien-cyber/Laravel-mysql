@@ -19,15 +19,16 @@ use App\Http\Controllers\SettingController;
 |--------------------------------------------------------------------------
 */
 
-// Root route for tests and quick health check
 Route::get('/', function () {
-    return response('OK', 200);
-});
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+})->name('home');
 
 // ==========================================
 // ក្រុមទី ១៖ គ្រប់គ្នាដែលបាន Login រួចអាចប្រើប្រាស់បាន (Admin, Staff, Cashier)
 // ==========================================
-Route::middleware([\Illuminate\Auth\Middleware\Authenticate::class])->group(function () {
+Route::middleware('auth')->group(function () {
 
     // ទំព័រ Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
