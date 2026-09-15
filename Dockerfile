@@ -51,10 +51,14 @@ COPY --from=assets /app/public/build ./public/build
 
 RUN rm -f bootstrap/cache/*.php
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
-
-# Set permissions
-RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts \
+    && mkdir -p \
+        storage/framework/views \
+        storage/framework/cache \
+        storage/framework/sessions \
+        storage/logs \
+        bootstrap/cache \
+    && chmod -R 777 storage bootstrap/cache
 
 # Expose Port
 EXPOSE 8000
