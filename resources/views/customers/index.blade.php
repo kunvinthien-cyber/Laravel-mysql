@@ -17,6 +17,13 @@
 
         </a>
 
+        <a href="{{ route('customers.export.excel') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg">
+            Export Phones Excel
+        </a>
+        <a href="{{ route('customers.debts.pdf') }}" class="bg-red-600 text-white px-4 py-2 rounded-lg">
+            Debt PDF
+        </a>
+
     </div>
 
     <form method="GET" class="mb-5">
@@ -59,6 +66,7 @@
                     <th class="p-3 text-left">Name</th>
                     <th class="p-3 text-left">Email</th>
                     <th class="p-3 text-left">Phone</th>
+                    <th class="p-3 text-left">Points</th>
                     <th class="p-3 text-left">Action</th>
 
                 </tr>
@@ -87,6 +95,12 @@
                             {{ $customer->phone }}
                         </td>
 
+                        <td class="p-3">
+                            <span class="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-2.5 py-1 text-xs font-bold">
+                                {{ $customer->points ?? 0 }} pts
+                            </span>
+                        </td>
+
                         <!-- ប៊ូតុងសកម្មភាពក្នុងតារាងអតិថិជន -->
 <td class="p-3 text-sm text-right flex justify-end space-x-2">
     <!-- គ្រប់គ្នា (រួមទាំង Cashier) អាចមើលឃើញប៊ូតុង កែប្រែ -->
@@ -112,7 +126,7 @@
 
                     <tr>
 
-                        <td colspan="5"
+                        <td colspan="6"
                             class="text-center py-6 text-gray-500">
 
                             No customers found.

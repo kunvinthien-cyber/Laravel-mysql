@@ -82,7 +82,7 @@
 
             </div>
 
-            <div class="mb-6">
+            <div class="mb-4">
 
                 <label class="block mb-2 font-medium">
 
@@ -101,6 +101,34 @@
                     </p>
                 @enderror
 
+            </div>
+
+            <div class="mb-6">
+
+                <label class="block mb-2 font-medium">
+
+                    Points
+
+                </label>
+
+                <input
+                    type="number"
+                    name="points"
+                    min="0"
+                    value="{{ old('points', 0) }}"
+                    class="w-full border rounded-lg px-4 py-2">
+
+                @error('points')
+                    <p class="text-red-500 text-sm mt-1">
+                        {{ $message }}
+                    </p>
+                @enderror
+
+            </div>
+
+            <div class="mb-6">
+                <label class="block mb-2 font-medium">Debt</label>
+                <input type="number" step="0.01" min="0" name="debt" value="{{ old('debt', 0) }}" class="w-full border rounded-lg px-4 py-2">
             </div>
 
             <div class="flex gap-3">

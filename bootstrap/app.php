@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\EnsureShopIsActive;
 
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => CheckRole::class,
+            'shop.active' => EnsureShopIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

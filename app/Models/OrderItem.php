@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToShop;
 
 class OrderItem extends Model
 {
+    use BelongsToShop;
+
     protected $fillable = [
         'order_id',
         'product_id',

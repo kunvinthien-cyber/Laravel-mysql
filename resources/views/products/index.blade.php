@@ -36,7 +36,7 @@ function confirmDelete(id){
 <div class="space-y-6">
 
     {{-- HEADER --}}
-    <div class="flex items-center justify-between">
+    {{-- <div class="flex items-center justify-between">
         <th>Category</th>
         <h1 class="text-2xl font-bold">
             Products
@@ -47,7 +47,7 @@ function confirmDelete(id){
             + Add Product
         </a>
 
-    </div>
+    </div> --}}
 
     {{-- STATS CARDS --}}
     <div class="grid grid-cols-3 gap-6">
@@ -114,12 +114,25 @@ function confirmDelete(id){
 
     </form>
 
+    <div class="flex gap-2">
+    <a href="{{ route('products.export.excel') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg">
+        Export Stock Excel
+    </a>
+    <a href="{{ route('products.labels.pdf') }}" class="bg-red-600 text-white px-4 py-2 rounded-lg">
+        PDF Labels
+    </a>
+    <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data" class="flex gap-2">
+        @csrf
+        <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="border rounded-lg px-2 py-1">
+        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">Import Excel</button>
+    </form>
     <a href="{{ route('products.create') }}"
        class="bg-black text-white px-5 py-2 rounded-lg">
 
         + Add Product
 
     </a>
+    </div>
 
 </div>
     {{-- TABLE --}}

@@ -9,14 +9,20 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 // បន្ថែម 'role' ទៅក្នុង Fillable Attribute របស់ Laravel 11
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'shop_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -51,6 +57,11 @@ class User extends Authenticatable
     public function isStaff(): bool
     {
         return $this->role === 'staff';
+    }
+
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
     }
 
     /**

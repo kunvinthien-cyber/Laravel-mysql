@@ -7,6 +7,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 
 class PosController extends Controller
@@ -28,8 +29,9 @@ class PosController extends Controller
     public function checkout(Request $request)
     {
         $request->validate([
-            // ១. កែសម្រួលទៅជា nullable ដើម្បីអនុញ្ញាតឱ្យលក់ជា ភ្ញៀវទូទៅ (Guest Checkout)
             'customer_id' => 'nullable|exists:customers,id',
+            'payment_method' => 'required|in:cash,aba,aceleda,machine',
+            'receipt_no' => 'nullable|string|max:100',
             'cart' => 'required|array|min:1',
             'cart.*.id' => 'required|exists:products,id',
             'cart.*.qty' => 'required|integer|min:1',
@@ -55,18 +57,21 @@ class PosController extends Controller
                 $subtotal += $product->price * $item['qty'];
             }
 
-            // ២. គណនាពន្ធឌីណាមិកតាមការកំណត់របស់ហាង (Dynamic Tax Calculation)
-            $taxRate = (float) config('settings.tax_rate', 0); // ទាញយកអត្រាពន្ធពី Database
-            $taxAmount = $subtotal * ($taxRate / 100);       // គណនាទឹកប្រាក់ពន្ធ
-            $total = $subtotal + $taxAmount;                  // តម្លៃសរុបចុងក្រោយរួមបញ្ចូលទាំងពន្ធ
+            $taxRate = (float) (Setting::query()
+                ->where('key', 'tax_rate')
+                ->value('value') ?? 0);
+            $taxAmount = $subtotal * ($taxRate / 100);
+            $total = $subtotal + $taxAmount;
+
+            $customer = $request->customer_id ? Customer::find($request->customer_id) : null;
 
             $order = Order::create([
-                'customer_id' => $request->customer_id, // អាចជា ID អតិថិជន ឬ null (ភ្ញៀវទូទៅ)
+                'customer_id' => $request->customer_id,
+                'cashier_id' => $request->user()->id,
                 'total' => $total,
                 'status' => 'completed',
-                // បើសិនជាតារាង orders របស់អ្នកមាន column subtotal និង tax អ្នកអាចបញ្ជូនតម្លៃទាំងនោះបាន៖
-                // 'subtotal' => $subtotal,
-                // 'tax' => $taxAmount,
+                'payment_method' => $request->payment_method,
+                'receipt_no' => $request->receipt_no,
             ]);
 
             foreach ($request->cart as $item) {
@@ -82,6 +87,10 @@ class PosController extends Controller
                 ]);
 
                 $product->decrement('stock', $item['qty']);
+            }
+
+            if ($customer) {
+                $customer->increment('points', (int) round($total));
             }
 
             DB::commit();

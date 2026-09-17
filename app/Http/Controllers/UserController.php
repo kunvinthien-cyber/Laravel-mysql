@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Shop;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -23,7 +26,9 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        $shops = Shop::where('status', 'active')->orderBy('name')->get();
+
+        return view('users.create', compact('shops'));
     }
 
     /**
@@ -35,15 +40,52 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'string', 'in:admin,staff,cashier'],
+            'role' => ['required', 'string', 'in:owner,staff,cashier'],
+            'shop_name' => ['nullable', 'string', 'max:255'],
+            'shop_phone' => ['nullable', 'string', 'max:50'],
+            'shop_address' => ['nullable', 'string', 'max:500'],
+            'shop_id' => [
+                Rule::requiredIf(fn () => in_array($request->role, ['staff', 'cashier'], true)),
+                'nullable',
+                Rule::exists('shops', 'id')->where(fn ($query) => $query->where('status', 'active')),
+            ],
         ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
+        DB::transaction(function () use ($request) {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+                'shop_id' => $request->input('shop_id'),
+            ]);
+
+            if ($user->isOwner()) {
+                $shop = Shop::create([
+                    'owner_id' => $user->id,
+                    'name' => $request->input('shop_name') ?: $user->name,
+                    'phone' => $request->input('shop_phone'),
+                    'address' => $request->input('shop_address'),
+                    'status' => 'active',
+                ]);
+
+                $user->update(['shop_id' => $shop->id]);
+
+                foreach ([
+                    'shop_name' => $shop->name,
+                    'shop_phone' => $shop->phone,
+                    'shop_email' => $shop->email,
+                    'shop_address' => $shop->address,
+                    'currency_symbol' => '$',
+                    'tax_rate' => '0',
+                ] as $key => $value) {
+                    Setting::updateOrCreate(
+                        ['shop_id' => $shop->id, 'key' => $key],
+                        ['value' => $value]
+                    );
+                }
+            }
+        });
 
         return redirect()->route('users.index')->with('success', 'បង្កើតគណនីបុគ្គលិកបានជោគជ័យ។');
     }
@@ -53,7 +95,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        $shops = Shop::where('status', 'active')->orderBy('name')->get();
+
+        return view('users.edit', compact('user', 'shops'));
     }
 
     /**
@@ -65,12 +109,22 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'], // បើទុកទទេ គឺមិនប្តូរលេខសម្ងាត់ឡើយ
-            'role' => ['required', 'string', 'in:admin,staff,cashier'],
+            'role' => ['required', 'string', 'in:owner,staff,cashier'],
+            'shop_id' => [
+                Rule::requiredIf(fn () => in_array($request->role, ['staff', 'cashier'], true)),
+                'nullable',
+                Rule::exists('shops', 'id')->where(fn ($query) => $query->where('status', 'active')),
+            ],
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->role = $request->role;
+        if (!$user->isAdmin()) {
+            $user->role = $request->role;
+            if (!$user->isOwner()) {
+                $user->shop_id = $request->input('shop_id');
+            }
+        }
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);

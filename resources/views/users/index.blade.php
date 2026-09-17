@@ -4,11 +4,11 @@
 <div class="p-6 bg-white rounded-2xl shadow-sm">
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h2 class="text-xl font-bold text-gray-800">គ្រប់គ្រងគណនីបុគ្គលិក</h2>
-            <p class="text-sm text-gray-500">មើល បង្កើត កែសម្រួល ឬលុបគណនីបុគ្គលិកក្នុងប្រព័ន្ធ</p>
+            <h2 class="text-xl font-bold text-gray-800">{{ ($staffMode ?? false) ? 'គ្រប់គ្រងបុគ្គលិកហាង' : 'គ្រប់គ្រងគណនីម្ចាស់ហាង និងបុគ្គលិក' }}</h2>
+            <p class="text-sm text-gray-500">{{ ($staffMode ?? false) ? 'បង្កើត Cashier/Staff និង reset password របស់ពួកគេ' : 'Admin តែមួយគត់អាចគ្រប់គ្រង accounts បាន' }}</p>
         </div>
-        <a href="{{ route('users.create') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition">
-            + បន្ថែមបុគ្គលិកថ្មី
+        <a href="{{ route(($staffMode ?? false) ? 'staff.create' : 'users.create') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition">
+            + {{ ($staffMode ?? false) ? 'បង្កើតបុគ្គលិក' : 'បង្កើតគណនីថ្មី' }}
         </a>
     </div>
 
@@ -41,19 +41,21 @@
                         <td class="p-3 text-sm text-gray-600">{{ $user->email }}</td>
                         <td class="p-3 text-sm text-center">
                             @if($user->isAdmin())
-                                <span class="px-2.5 py-1 text-xs font-bold bg-blue-100 text-blue-800 rounded-full">👑 Admin</span>
+                                <span class="px-2.5 py-1 text-xs font-bold bg-blue-100 text-blue-800 rounded-full"><i class="fa-solid fa-crown mr-1"></i>Admin</span>
+                            @elseif($user->isOwner())
+                                <span class="px-2.5 py-1 text-xs font-bold bg-green-100 text-green-800 rounded-full"><i class="fa-solid fa-store mr-1"></i>Owner</span>
                             @elseif($user->isStaff())
-                                <span class="px-2.5 py-1 text-xs font-bold bg-purple-100 text-purple-800 rounded-full">👨‍💼 Staff</span>
+                                <span class="px-2.5 py-1 text-xs font-bold bg-purple-100 text-purple-800 rounded-full"><i class="fa-solid fa-user-tie mr-1"></i>Staff</span>
                             @else
-                                <span class="px-2.5 py-1 text-xs font-bold bg-orange-100 text-orange-800 rounded-full">💰 Cashier</span>
+                                <span class="px-2.5 py-1 text-xs font-bold bg-orange-100 text-orange-800 rounded-full"><i class="fa-solid fa-cash-register mr-1"></i>Cashier</span>
                             @endif
                         </td>
                         <td class="p-3 text-sm text-right flex justify-end space-x-2">
-                            <a href="{{ route('users.edit', $user->id) }}" class="px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 text-xs font-bold rounded transition">
+                            <a href="{{ route(($staffMode ?? false) ? 'staff.edit' : 'users.edit', $user->id) }}" class="px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 text-xs font-bold rounded transition">
                                 កែសម្រួល
                             </a>
                             @if(auth()->id() !== $user->id)
-                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('តើអ្នកពិតជាចង់លុបគណនីបុគ្គលិកនេះមែនទេ?')">
+                                <form action="{{ route(($staffMode ?? false) ? 'staff.destroy' : 'users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('តើអ្នកពិតជាចង់លុបគណនីនេះមែនទេ?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 text-xs font-bold rounded transition">

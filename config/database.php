@@ -60,9 +60,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? [
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA', '/etc/ssl/cert.pem'),
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => true,
             ] : [],
         ],
 
@@ -81,9 +79,9 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => extension_loaded('pdo_mysql') ? [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ] : [],
         ],
 
         'pgsql' => [

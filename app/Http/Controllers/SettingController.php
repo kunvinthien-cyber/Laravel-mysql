@@ -10,9 +10,21 @@ class SettingController extends Controller
     /**
      * បង្ហាញទំព័រ Settings
      */
-    public function index()
+    public function index(Request $request)
     {
-        $settings = Setting::pluck('value', 'key')->all();
+        $user = $request->user();
+        $shop = $user->shop;
+        $settings = Setting::get()->pluck('value', 'key')->all();
+
+        if ($shop) {
+            $settings = array_merge($settings, [
+                'shop_name' => $shop->name,
+                'shop_phone' => $shop->phone,
+                'shop_email' => $shop->email,
+                'shop_address' => $shop->address,
+            ]);
+        }
+
         return view('settings.index', compact('settings'));
     }
 
@@ -30,9 +42,21 @@ class SettingController extends Controller
             'tax_rate' => 'required|numeric|min:0|max:100',
         ]);
 
+        $user = $request->user();
+        $shop = $user->shop;
+
+        if ($shop) {
+            $shop->update([
+                'name' => $data['shop_name'],
+                'phone' => $data['shop_phone'] ?? null,
+                'email' => $data['shop_email'] ?? null,
+                'address' => $data['shop_address'] ?? null,
+            ]);
+        }
+
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(
-                ['key' => $key],
+                ['shop_id' => $user->shop_id, 'key' => $key],
                 ['value' => $value]
             );
         }

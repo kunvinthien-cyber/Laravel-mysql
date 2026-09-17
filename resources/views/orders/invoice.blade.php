@@ -38,6 +38,9 @@
             🖨 Print
 
         </button>
+        <a href="{{ route('orders.invoice.pdf', $order) }}" class="bg-red-600 text-white px-5 py-2 rounded-lg">
+            Download PDF
+        </a>
 
     </div>
 
@@ -49,6 +52,8 @@
     <div class="text-sm text-gray-600">
         <p><strong>អតិថិជន៖</strong> {{ $order->customer->name }}</p>
         <p><strong>អុីមែល៖</strong> {{ $order->customer->email }}</p>
+        <p><strong>លេខទូរស័ព្ទ៖</strong> {{ $order->customer->phone ?? 'N/A' }}</p>
+        <p><strong>ពិន្ទុ៖</strong> {{ $order->customer->points ?? 0 }} pts</p>
     </div>
 @else
     <!-- បង្ហាញព័ត៌មានជំនួស ក្នុងករណីលក់ជូនភ្ញៀវទូទៅ (Guest Checkout) -->
@@ -70,6 +75,14 @@
                 {{ ucfirst($order->status) }}
 
             </span>
+
+            <p class="mt-3 text-sm text-gray-600">
+                <strong>Payment:</strong> {{ strtoupper($order->payment_method ?? 'cash') }}
+            </p>
+
+            <p class="mt-2 text-sm text-gray-600">
+                <strong>Receipt No:</strong> {{ $order->receipt_no ?? 'N/A' }}
+            </p>
 
         </div>
 

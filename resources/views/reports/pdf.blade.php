@@ -37,6 +37,8 @@
 <body>
 
 <h2>Sales Report</h2>
+<p>Total Sales: ${{ number_format($totalSales, 2) }}</p>
+<p>Total Profit: ${{ number_format($totalProfit, 2) }}</p>
 
 <table>
 

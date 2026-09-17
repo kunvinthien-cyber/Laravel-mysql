@@ -25,6 +25,15 @@ class ReportController extends Controller
     // Total Sales
     $totalSales = (clone $query)->sum('total');
 
+    $staffSales = (clone $query)
+        ->reorder()
+        ->with('cashier')
+        ->selectRaw('cashier_id, COUNT(*) as order_count, SUM(total) as total_sales')
+        ->whereNotNull('cashier_id')
+        ->groupBy('cashier_id')
+        ->orderByDesc('total_sales')
+        ->get();
+
     // Orders List
     $orders = $query
         ->latest()
@@ -33,53 +42,44 @@ class ReportController extends Controller
 
     return view('reports.index', compact(
         'orders',
-        'totalSales'
+        'totalSales',
+        'staffSales'
     ));
 }
     public function exportExcel()
-{
-    $orders = Order::with(['customer', 'items.product'])->get();
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray([['Order ID', 'Date', 'Staff', 'Customer', 'Product', 'Qty', 'Revenue', 'Cost', 'Profit', 'Status']], null, 'A1');
 
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+        $row = 2;
+        foreach (Order::with(['customer', 'cashier', 'items.product'])->latest()->get() as $order) {
+            foreach ($order->items as $item) {
+                $revenue = (float) $item->subtotal;
+                $cost = (float) ($item->product?->cost_price ?? 0) * (int) $item->quantity;
+                $sheet->fromArray([[
+                    $order->id,
+                    $order->created_at->format('Y-m-d H:i'),
+                    $order->cashier?->name,
+                    $order->customer?->name,
+                    $item->product?->name,
+                    $item->quantity,
+                    $revenue,
+                    $cost,
+                    $revenue - $cost,
+                    ucfirst($order->status),
+                ]], null, 'A' . $row++);
+            }
+        }
 
-    // Header
-    $sheet->setCellValue('A1', 'Order ID');
-    $sheet->setCellValue('B1', 'Customer');
-    $sheet->setCellValue('C1', 'Products');
-    $sheet->setCellValue('D1', 'Total');
-    $sheet->setCellValue('E1', 'Status');
-    $sheet->setCellValue('F1', 'Date');
+        foreach (range('A', 'J') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
 
-    $row = 2;
+        $writer = new Xlsx($spreadsheet);
 
-    foreach ($orders as $order) {
-
-        $products = $order->items
-            ->pluck('product.name')
-            ->implode(', ');
-
-        $sheet->setCellValue('A'.$row, $order->id);
-        $sheet->setCellValue('B'.$row, optional($order->customer)->name);
-        $sheet->setCellValue('C'.$row, $products);
-        $sheet->setCellValue('D'.$row, $order->total);
-        $sheet->setCellValue('E'.$row, ucfirst($order->status));
-        $sheet->setCellValue(
-            'F'.$row,
-            $order->created_at->format('d-m-Y')
-        );
-
-        $row++;
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, 'Sales_Report.xlsx');
     }
-
-    foreach (range('A', 'F') as $column) {
-        $sheet->getColumnDimension($column)->setAutoSize(true);
-    }
-
-    $writer = new Xlsx($spreadsheet);
-
-    return response()->streamDownload(function () use ($writer) {
-        $writer->save('php://output');
-    }, 'Sales_Report.xlsx');
-}
 }

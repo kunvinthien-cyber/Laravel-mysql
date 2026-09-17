@@ -9,11 +9,14 @@
 
         <div class="p-5 bg-white shadow rounded-xl">
 
-            <input
-                id="search"
-                type="text"
-                placeholder="🔍 Search product..."
-                class="w-full p-3 mb-6 border rounded-lg">
+            <div class="relative mb-6">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input
+                    id="search"
+                    type="text"
+                    placeholder="Search product..."
+                    class="w-full p-3 pl-10 border rounded-lg">
+            </div>
 
             <div class="grid grid-cols-4 gap-4">
 
@@ -72,9 +75,9 @@
 
         <div class="p-5 bg-white shadow rounded-xl">
 
-            <h2 class="mb-4 text-xl font-bold">
+            <h2 class="mb-4 text-xl font-bold flex items-center gap-2">
 
-                🛒 Cart
+                <i class="fa-solid fa-cart-shopping"></i>Cart
 
             </h2>
 <div class="mb-4">
@@ -93,12 +96,55 @@
         @foreach($customers as $customer)
 
             <option value="{{ $customer->id }}">
-                {{ $customer->name }}
+                {{ $customer->name }} - {{ $customer->phone ?? 'No phone' }} ({{ $customer->points ?? 0 }} pts)
             </option>
 
         @endforeach
 
     </select>
+</div>
+
+<div class="mb-4 rounded-lg border border-dashed border-gray-300 p-3 bg-gray-50">
+    <div class="flex items-center justify-between mb-3">
+        <label class="font-semibold text-gray-700">New customer</label>
+        <button type="button" id="toggleCustomerForm" class="text-sm text-blue-600 font-semibold">Add customer</button>
+    </div>
+
+    <div id="customerForm" class="hidden space-y-3">
+        <input type="text" id="new_customer_name" placeholder="Customer name" class="w-full p-2 border rounded-lg">
+        <input type="text" id="new_customer_phone" placeholder="Phone number" class="w-full p-2 border rounded-lg">
+        <input type="number" id="new_customer_points" min="0" value="0" placeholder="Points" class="w-full p-2 border rounded-lg">
+        <button type="button" id="createCustomerBtn" class="w-full bg-blue-600 text-white py-2 rounded-lg">Save customer</button>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="block mb-2 font-semibold">
+        Payment Method
+    </label>
+
+    <select
+        id="payment_method"
+        class="w-full p-2 border rounded-lg">
+
+        <option value="cash">Cash</option>
+        <option value="aba">ABA</option>
+        <option value="aceleda">ACLEDA</option>
+        <option value="machine">Card / Machine</option>
+
+    </select>
+</div>
+
+<div class="mb-4">
+    <label class="block mb-2 font-semibold">
+        Receipt No
+    </label>
+
+    <input
+        type="text"
+        id="receipt_no"
+        placeholder="Receipt number"
+        class="w-full p-2 border rounded-lg">
 </div>
             <table class="w-full">
 
@@ -212,7 +258,7 @@ if(cart.length === 0){
                         onclick="removeItem(${index})"
                         class="text-red-500">
 
-                        ✕
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
 
                 </td>
@@ -226,6 +272,62 @@ if(cart.length === 0){
         '$' + total.toFixed(2);
 
 }
+
+document.getElementById('toggleCustomerForm').addEventListener('click', function () {
+    const form = document.getElementById('customerForm');
+    form.classList.toggle('hidden');
+});
+
+document.getElementById('createCustomerBtn').addEventListener('click', function () {
+    const name = document.getElementById('new_customer_name').value.trim();
+    const phone = document.getElementById('new_customer_phone').value.trim();
+    const points = document.getElementById('new_customer_points').value || 0;
+
+    const customerName = name || 'Walk-in customer';
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    fetch("{{ route('customers.store') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({
+            name: customerName,
+            phone,
+            email: null,
+            points: Number(points),
+            address: ''
+        })
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.message || 'Customer could not be created.');
+        }
+        return data;
+    })
+    .then(data => {
+        const select = document.getElementById('customer_id');
+        const option = document.createElement('option');
+        option.value = data.customer_id || data.id;
+        option.textContent = `${customerName} - ${phone || 'No phone'} (${Number(points) || 0} pts)`;
+        option.selected = true;
+        select.appendChild(option);
+
+        document.getElementById('new_customer_name').value = '';
+        document.getElementById('new_customer_phone').value = '';
+        document.getElementById('new_customer_points').value = 0;
+        document.getElementById('customerForm').classList.add('hidden');
+
+        Swal.fire('Success', 'Customer created successfully.', 'success');
+    })
+    .catch(error => {
+        Swal.fire('Error', error.message || 'Customer create failed.', 'error');
+    });
+});
 
 document.querySelectorAll('.addCart').forEach(button => {
 
@@ -305,15 +407,8 @@ document.getElementById('checkoutBtn').addEventListener('click', function () {
     }
 
     let customer = document.getElementById('customer_id').value;
-
-    if (!customer) {
-        Swal.fire(
-            'Warning',
-            'Please select a customer.',
-            'warning'
-        );
-        return;
-    }
+    let paymentMethod = document.getElementById('payment_method').value;
+    let receiptNo = document.getElementById('receipt_no').value.trim();
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
@@ -338,7 +433,9 @@ document.getElementById('checkoutBtn').addEventListener('click', function () {
 
         body: JSON.stringify({
 
-            customer_id: customer,
+            customer_id: customer || null,
+            payment_method: paymentMethod,
+            receipt_no: receiptNo || null,
             cart: cart
 
         })

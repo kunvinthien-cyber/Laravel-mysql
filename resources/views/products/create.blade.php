@@ -62,6 +62,9 @@
         <p class="text-sm text-red-500">{{ $message }}</p>
     @enderror
 
+    <input type="number" step="0.01" name="cost_price" value="{{ old('cost_price', 0) }}" placeholder="Cost Price" class="w-full p-2 border rounded-lg">
+    <input type="text" name="barcode" value="{{ old('barcode') }}" placeholder="Barcode" class="w-full p-2 border rounded-lg">
+
 
     {{-- Stock --}}
     <input

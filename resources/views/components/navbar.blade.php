@@ -13,7 +13,7 @@
        <form method="POST" action="{{ route('logout') }}">
     @csrf
     <button type="submit" class="flex items-center space-x-2 p-2 w-full text-left text-red-600 hover:bg-red-50 rounded-lg">
-        <span>🚪 ចាកចេញ (Logout)</span>
+        <i class="fa-solid fa-right-from-bracket"></i><span>ចាកចេញ (Logout)</span>
     </button>
 </form>
 

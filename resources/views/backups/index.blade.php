@@ -12,7 +12,7 @@
         <form action="{{ route('backups.create') }}" method="POST" onsubmit="showLoadingModal('កំពុងរក្សាទុកទិន្នន័យ (Backup)... សូមរង់ចាំ')">
             @csrf
             <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
-                <span>💾 បង្កើត Backup ថ្មី</span>
+                <i class="fa-solid fa-database"></i><span>បង្កើត Backup ថ្មី</span>
             </button>
         </form>
     </div>
@@ -89,10 +89,7 @@
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                     <div id="modal-icon-bg" class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10">
-                        <!-- Icon ព្រមាន -->
-                        <svg class="h-6 w-6" id="modal-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
+                        <i class="fa-solid fa-triangle-exclamation text-xl" id="modal-icon"></i>
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                         <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">
@@ -173,12 +170,12 @@
         if (isWarning) {
             // ពណ៌ក្រហម (សម្រាប់លុប)
             iconBg.className = "mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10";
-            icon.className = "h-6 w-6 text-red-600";
+            icon.className = "fa-solid fa-triangle-exclamation text-xl text-red-600";
             submitBtn.className = "w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-semibold text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition";
         } else {
             // ពណ៌បៃតង (សម្រាប់ស្ដារទិន្នន័យ)
             iconBg.className = "mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10";
-            icon.className = "h-6 w-6 text-green-600";
+            icon.className = "fa-solid fa-rotate text-xl text-green-600";
             submitBtn.className = "w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-semibold text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition";
         }
 
@@ -215,7 +212,7 @@
         openConfirmModal(
             url,
             'POST',
-            '🔄 ស្ដារទិន្នន័យឡើងវិញ (Restore Database)',
+            'ស្ដារទិន្នន័យឡើងវិញ (Restore Database)',
             'ប្រយ័ត្ន៖ ការស្ដារទិន្នន័យនេះ នឹងជំនួសទិន្នន័យបច្ចុប្បន្នទាំងអស់! រាល់ការលក់ និងផលិតផលថ្មីៗបន្ទាប់ពីកាលបរិច្ឆេទចម្លងទុក នឹងត្រូវបាត់បង់ទាំងស្រុង។ តើអ្នកពិតជាចង់ស្ដារមែនទេ?',
             false, // មិនមែន Warning ពណ៌ក្រហមទេ (ពណ៌បៃតង)
             'ស្ដារឡើងវិញ'
@@ -229,7 +226,7 @@
         openConfirmModal(
             url,
             'DELETE',
-            '🗑️ លុបឯកសារចម្លងទុក (Delete Backup)',
+            'លុបឯកសារចម្លងទុក (Delete Backup)',
             'តើអ្នកពិតជាចង់លុបឯកសារ Backup នេះចេញពីប្រព័ន្ធមែនទេ? អ្នកមិនអាចទាញយកឯកសារនេះត្រឡប់មកវិញបានឡើយ។',
             true, // បង្ហាញពណ៌ក្រហម (ព្រមាន)
             'លុបចោល'

@@ -7,13 +7,13 @@
     {{-- STATISTICS --}}
     <div class="grid grid-cols-4 gap-6">
 
-      @if(auth()->user()->isAdmin() || auth()->user()->isStaff())
+    @if(auth()->user()->isAdmin() || auth()->user()->isOwner() || auth()->user()->isStaff())
     <x-stat-card
         title="Total Revenue"
         value="${{ number_format($revenue, 2) }}"
         badge="+12%"
         color="blue"
-        icon="💰"
+        icon="<i class='fa-solid fa-dollar-sign'></i>"
     />
 @endif
 
@@ -22,7 +22,7 @@
             value="{{ $orders }}"
             badge="+8%"
             color="green"
-            icon="📦"
+            icon="<i class='fa-solid fa-box'></i>"
         />
 
         <x-stat-card
@@ -30,7 +30,7 @@
             value="{{ $outOfStock }} Items"
             badge="Urgent"
             color="red"
-            icon="⚠️"
+            icon="<i class='fa-solid fa-triangle-exclamation'></i>"
         />
 
         <x-stat-card
@@ -38,7 +38,7 @@
             value="{{ $customers }}"
             badge="+5%"
             color="yellow"
-            icon="👥"
+            icon="<i class='fa-solid fa-users'></i>"
         />
 
         <x-stat-card
@@ -46,7 +46,7 @@
             value="{{ $products }}"
             badge="Inventory"
             color="purple"
-            icon="🛍️"
+            icon="<i class='fa-solid fa-bag-shopping'></i>"
         />
     </div>
 
@@ -160,7 +160,7 @@
 
     <div class="flex items-center justify-between mb-5">
         <div class="flex items-center space-x-2">
-            <span class="text-xl">⚠️</span>
+            <i class="fa-solid fa-triangle-exclamation text-xl text-red-600"></i>
             <h2 class="text-lg font-bold text-red-600">
                 Low Stock Alert (Stock &le; 5)
             </h2>
@@ -231,7 +231,7 @@
 <div class="p-6 mt-6 bg-white shadow-sm rounded-2xl">
 
     <h2 class="mb-5 text-lg font-bold">
-        🔥 Best Selling Products
+        <i class="fa-solid fa-fire text-orange-500 mr-2"></i>Best Selling Products
     </h2>
 
     <table class="w-full">
@@ -278,11 +278,11 @@
     </table>
 
 </div>
-@if(auth()->user()->isAdmin() || auth()->user()->isStaff())
+@if(auth()->user()->isAdmin() || auth()->user()->isOwner() || auth()->user()->isStaff())
 <div class="p-6 mt-6 bg-white shadow-sm rounded-2xl">
 
     <h2 class="mb-5 text-lg font-bold">
-        👑 Top Customers
+        <i class="fa-solid fa-crown text-yellow-500 mr-2"></i>Top Customers
     </h2>
 
     <table class="w-full">

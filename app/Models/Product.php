@@ -4,14 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
+use App\Models\Concerns\BelongsToShop;
 
 class Product extends Model
 {
+    use BelongsToShop;
+
     protected $fillable = [
+        'shop_id',
         'name',
         'price',
+        'cost_price',
         'stock',
         'image',
+        'barcode',
         'category_id',
     ];
 

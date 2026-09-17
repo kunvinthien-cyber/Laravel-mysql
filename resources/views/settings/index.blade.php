@@ -55,8 +55,8 @@
         </div>
 
         <div class="flex justify-end pt-4 border-t">
-            <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition">
-                💾 រក្សាទុកការកំណត់
+            <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>រក្សាទុកការកំណត់
             </button>
         </div>
     </form>

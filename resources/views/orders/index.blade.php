@@ -43,7 +43,7 @@ Swal.fire({
             type="text"
             name="search"
             value="{{ request('search') }}"
-            placeholder="Search Order ID..."
+            placeholder="Search Order ID or Customer Name"
             class="border rounded-lg px-4 py-2">
 
         <select
@@ -78,16 +78,18 @@ Swal.fire({
 
     </form>
 
-    <a href="{{ route('orders.create') }}"
-       class="bg-black text-white px-5 py-2 rounded-lg">
+    @if(auth()->user()->isAdmin() || auth()->user()->isOwner())
+        <a href="{{ route('orders.create') }}"
+           class="bg-black text-white px-5 py-2 rounded-lg">
 
-        + Add Order
+            + Add Order
 
-    </a>
-<a href="{{ route('orders.export.excel') }}"
-    class="px-4 py-2 bg-green-600 text-white rounded-lg">
-    📊 Export Excel
-</a>
+        </a>
+        <a href="{{ route('orders.export.excel') }}"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i>Export Excel
+        </a>
+    @endif
 </div>
 <p class="text-gray-500 mb-4">
 
@@ -153,18 +155,19 @@ Swal.fire({
                 <td class="p-3">
                     {{ $order->created_at->format('d M Y') }}
                 </td>
-                <td>{{ $item->product?->name ?? '-' }}</td>
+                <td>{{ $order->items->pluck('product.name')->filter()->implode(', ') ?: '-' }}</td>
 
 <td>{{ $order->customer?->name ?? '-' }}</td>
 
 <td class="space-x-3">
 
-    <a href="{{ route('orders.edit',$order) }}"
-       class="bg-blue-500 text-red-400 px-3 py-1 rounded">
-        Edit
-    </a>
+    @if(auth()->user()->isAdmin() || auth()->user()->isOwner())
+        <a href="{{ route('orders.edit',$order) }}"
+           class="bg-blue-500 text-white px-3 py-1 rounded">
+            Edit
+        </a>
 
-  <form action="{{ route('orders.destroy',$order) }}"
+      <form action="{{ route('orders.destroy',$order) }}"
       method="POST"
       class="delete-form inline">
 
@@ -179,9 +182,10 @@ Swal.fire({
 
     </button>
 
-</form>
+        </form>
+    @endif
 <a href="{{ route('orders.invoice',$order) }}"
-    class="bg-green-600 hover:bg-green-700 text-red-400 px-3 py-1 rounded">
+    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded">
 
     Invoice
 

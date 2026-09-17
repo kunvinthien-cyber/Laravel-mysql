@@ -8,6 +8,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
@@ -16,9 +17,15 @@ public function index(Request $request)
 {
     $query = Order::with(['items.product', 'customer']);
 
-    // Search by Order ID
     if ($request->filled('search')) {
-        $query->where('id', $request->search);
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('id', $search)
+                ->orWhereHas('customer', function ($customerQuery) use ($search) {
+                    $customerQuery->where('name', 'like', '%' . $search . '%');
+                });
+        });
     }
 
     // Filter by Status
@@ -108,6 +115,14 @@ public function invoice(Order $order)
     $order->load(['items.product', 'customer']);
 
     return view('orders.invoice', compact('order'));
+}
+
+public function invoicePdf(Order $order)
+{
+    $order->load(['items.product', 'customer']);
+
+    return Pdf::loadView('orders.invoice-pdf', compact('order'))
+        ->download('invoice-' . $order->id . '.pdf');
 }
 public function exportExcel()
 {
